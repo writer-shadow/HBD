@@ -24,7 +24,7 @@
       width: 90vw;
       max-width: 350px;
       height: 500px;
-      margin: 50px auto;
+      margin: 50px auto 10px;
       perspective: 1000px;
     }
 
@@ -36,7 +36,8 @@
       transform-style: preserve-3d;
     }
 
-    .card:hover .card-inner {
+    .card:hover .card-inner,
+    .card.flip .card-inner {
       transform: rotateY(180deg);
     }
 
@@ -50,16 +51,15 @@
       overflow: hidden;
     }
 
-.front {
-  background-color: #9612eb;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 2;
-  padding: 20px;
-  box-sizing: border-box;
-}
-
+    .front {
+      background-color: #9612eb;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2;
+      padding: 20px;
+      box-sizing: border-box;
+    }
 
     .back {
       background-color: #e6f0e6;
@@ -69,8 +69,10 @@
       background-size: cover;
       background-position: center;
     }
+
 .imgset img {
-  max-width: 100%;
+  width: 90%;
+  max-width: 250px;
   height: auto;
   display: block;
   margin: 0 auto;
@@ -98,16 +100,16 @@
     }
 
     /* Floating animations */
-.floating-heart {
-  position: absolute;
-  width: 40px;
-  height: 40px;
-  background: rgb(253, 15, 134);
-  animation: floatHeart 10s infinite ease-in;
-  z-index: 0;
-  top: -100px; /* <-- prevent hearts from initially showing at the bottom */
-}
-
+    .floating-heart {
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      background: red;
+      transform: rotate(-45deg);
+      animation: floatHeart 10s infinite ease-in;
+      z-index: 0;
+      top: -100px; /* Prevent visual stacking at bottom */
+    }
 
     .floating-heart::before,
     .floating-heart::after {
@@ -115,7 +117,7 @@
       position: absolute;
       width: 40px;
       height: 40px;
-      background: rgb(253, 15, 134);
+      background: red;
       border-radius: 50%;
     }
 
@@ -131,11 +133,14 @@
 
     @keyframes floatHeart {
       0% {
-        transform: translateY(100vh);
-        opacity: 0.5;
+        transform: translateY(100vh) rotate(-45deg);
+        opacity: 0;
+      }
+      5% {
+        opacity: 0.8;
       }
       100% {
-        transform: translateY(-20vh);
+        transform: translateY(-20vh) rotate(-45deg);
         opacity: 0;
       }
     }
@@ -162,20 +167,24 @@
       }
     }
 
-    .emoji-heart {
-      position: absolute;
-      animation: floatEmojiHeart linear infinite;
-      z-index: 0;
+    /* Tap to open text */
+    #tapText {
+      text-align: center;
+      margin-top: 10px;
+      font-size: 1rem;
+      font-weight: bold;
+      color: #9612eb;
+      transition: opacity 0.5s ease;
     }
 
-    @keyframes floatEmojiHeart {
-      0% {
-        transform: translateY(100vh);
-        opacity: 1;
-      }
-      100% {
-        transform: translateY(-100vh);
-        opacity: 0;
+    #tapText.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    @media (max-width: 480px) {
+      .text-container p {
+        font-size: 0.85rem;
       }
     }
   </style>
@@ -186,21 +195,20 @@
     <source src="https://www.fesliyanstudios.com/play-mp3/387" type="audio/mpeg">
   </audio>
 
-  <!-- Card Flip -->
-  <div class="card">
+  <!-- Card -->
+  <div class="card" id="birthdayCard">
     <div class="card-inner">
       <div class="front">
         <div class="imgset">
           <img src="https://1.bp.blogspot.com/-Mgj9-rbs65E/XfMoPSD5gtI/AAAAAAAAURk/NBokE2gSS2cTSJ2em5lZ5hJDuTtRN7UVwCLcBGAsYHQ/s1600/2713997.png" alt="Front Image" />
         </div>
       </div>
-
       <div class="back">
         <div class="text-container">
           <h2>Happiest Birthday My pasandida aurat!</h2>
           <p>I hope this special day brings you lots of happiness, love, and fun. You really deserve them a lot! You may not know but you are really a Diamond !</p>
           <p>Thank uh for being the most important part of my life! If we don't end up together... always remember this one who never end up trying to make you smile.</p>
-          <p>You are always in my duas.. May Allah fulfill your each nd every dream ! Be Positive nd always stay Happy.</p>
+          <p>You are always in my duas.. May Allah fulfills your each nd every dream ! Be Positive nd always stay Happy.</p>
           <p>Once again many many returns of the day to the one who knows my soul, the one who made my life infinitely beautiful !</p>
           <p>From Your Pen man... <br>For Moonlight <3!</p>
         </div>
@@ -208,10 +216,13 @@
     </div>
   </div>
 
+  <!-- Tap to open text -->
+  <div id="tapText">Tap the card to open</div>
+
   <script>
     const body = document.body;
 
-    // Red shape hearts
+    // Floating red hearts
     for (let i = 0; i < 20; i++) {
       const heart = document.createElement('div');
       heart.classList.add('floating-heart');
@@ -230,7 +241,23 @@
       body.appendChild(sparkle);
     }
 
-    // Emoji hearts ❤️
+    // Handle music + tap text removal on interaction
+    let flipped = false;
+    const tapText = document.getElementById("tapText");
+    const card = document.getElementById("birthdayCard");
+
+    card.addEventListener("mouseenter", handleFlip);
+    card.addEventListener("click", () => {
+      handleFlip();
+      card.classList.add("flip"); // for tap on mobile
+    });
+
+    function handleFlip() {
+      if (!flipped) {
+        tapText.classList.add("hidden");
+        flipped = true;
+      }
+    }
 
     function playMusic() {
       const song = document.getElementById("birthdaySong");
